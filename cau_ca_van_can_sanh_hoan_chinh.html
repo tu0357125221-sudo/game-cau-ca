@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Câu Cá Vạn Cân - Sảnh Game</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+body{min-height:100vh;color:#fff;background:linear-gradient(180deg,#1e3c72 0%,#2a5298 50%,#09203f 100%);display:flex;align-items:center;justify-content:center;padding:16px}
+button{border:0;cursor:pointer;font-weight:800}
+button:active{transform:translateY(2px)}
+#lobby{width:100%;max-width:480px}
+.lobby-card{background:rgba(15,23,42,.9);border:2px solid #f59e0b;border-radius:18px;padding:22px;box-shadow:0 12px 30px #0008;text-align:center;backdrop-filter:blur(8px)}
+.title{font-size:clamp(25px,7vw,32px);color:#fbbf24;text-shadow:2px 2px 4px #000;margin-bottom:18px;letter-spacing:1px}
+.stats-container{display:flex;justify-content:space-around;gap:8px;background:#ffffff18;padding:13px;border-radius:12px;margin-bottom:16px;flex-wrap:wrap}
+.stat-item{font-size:15px;font-weight:800}.gold{color:#facc15}.gem{color:#d8a5ff}
+.main-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.action-btn{padding:13px 8px;border-radius:11px;color:white;background:linear-gradient(#3989c6,#15517f);box-shadow:0 4px 0 #0b2d49;font-size:14px}
+.btn-go-fishing{grid-column:1/-1;width:100%;padding:16px;font-size:21px;color:#382000;background:linear-gradient(#fef08a,#f59e0b);border-radius:12px;box-shadow:0 4px 0 #9a5707}
+.code-section{border-top:1px solid #ffffff35;padding-top:17px;margin-top:4px}
+.code-section label{display:block;margin-bottom:9px;font-size:14px;color:#cbd5e1;font-weight:800}
+.input-group{display:flex;gap:8px}
+.input-code{min-width:0;flex:1;padding:12px;border-radius:8px;border:1px solid #64748b;background:#0f172a;color:white;font-size:16px;outline:none}
+.btn-redeem{padding:10px 16px;background:#2563eb;color:white;border-radius:8px}
+.skill-list{margin-top:16px;text-align:left;background:#0005;padding:13px;border-radius:9px}
+.skill-title{font-size:14px;color:#cbd5e1;margin-bottom:7px;font-weight:700}
+.skill-name{font-size:13px;color:#38bdf8;line-height:1.5;overflow-wrap:anywhere}
+.note{font-size:11px;color:#94a3b8;margin-top:12px}
+#fishing{display:none;position:fixed;inset:0;overflow:hidden;background:linear-gradient(#7fc9e9 0 32%,#168ab6 32% 73%,#8b9c75 73%);color:white}
+.sky{position:absolute;inset:0 0 68%;background:linear-gradient(#2878a8,#a8e3f1)}
+.sun{position:absolute;right:12%;top:8%;width:54px;height:54px;border-radius:50%;background:#ffe58b;box-shadow:0 0 35px #fff0a0}
+.hills{position:absolute;top:22%;width:100%;height:17%;background:#4b9462;clip-path:polygon(0 70%,12% 20%,25% 65%,40% 5%,58% 68%,73% 12%,88% 70%,100% 28%,100% 100%,0 100%)}
+.water{position:absolute;top:34%;height:43%;width:100%;background:repeating-linear-gradient(175deg,#168bb6 0 16px,#2ba9ca 17px 20px,#147da9 21px 38px)}
+.bank{position:absolute;bottom:0;height:28%;width:100%;background:linear-gradient(145deg,#8d9c79,#586b50)}
+.dock{position:absolute;left:0;bottom:0;width:57%;height:30%;background:repeating-linear-gradient(0deg,#bca77e 0 28px,#8f7959 29px 32px);clip-path:polygon(0 0,100% 30%,100% 100%,0 100%)}
+.fish-top{position:absolute;z-index:4;top:10px;left:10px;right:10px;background:#142638e8;padding:11px;border-radius:12px;display:flex;justify-content:space-between;gap:8px;font-weight:800}
+#fishStatus{position:absolute;z-index:4;top:65px;left:10px;right:10px;text-align:center;background:#102b43cc;padding:9px;border-radius:10px;color:#ffe8a3;font-weight:800}
+#angler{position:absolute;z-index:2;left:17%;bottom:27%;font-size:76px}
+#rod{position:absolute;z-index:3;left:27%;bottom:46%;font-size:75px;transform:rotate(-35deg)}
+#bigFish{position:absolute;right:12%;top:48%;font-size:75px;transition:transform .2s}
+#actions{position:absolute;z-index:6;right:12px;bottom:24px;display:flex;flex-direction:column;gap:10px}
+#pull{background:linear-gradient(#ffdc72,#b87b16);color:#382000;font-size:19px;min-width:135px;padding:15px;border-radius:12px}
+#back{position:absolute;z-index:7;left:12px;bottom:22px;background:#263e54;color:white;padding:13px 16px;border-radius:10px}
+.hp-wrap{height:12px;background:#4b1717;border-radius:10px;overflow:hidden;margin-top:7px}
+#fishHp{height:100%;width:100%;background:linear-gradient(90deg,#ff3636,#ff9c35);transition:width .2s}
+#message{position:fixed;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);background:#102b43f5;padding:20px;border:2px solid #f5d36b;border-radius:16px;text-align:center;display:none;width:min(86%,360px);font-weight:bold;box-shadow:0 10px 30px #0009;line-height:1.6}
+#message button{margin-top:12px;padding:10px 20px;border-radius:8px;background:#2563eb;color:white}
+@media(max-width:360px){.lobby-card{padding:16px}.action-btn{font-size:12px}.stat-item{font-size:13px}}
+</style>
+</head>
+<body>
+<div id="lobby">
+  <main class="lobby-card">
+    <h1 class="title">🎣 Câu Cá Vạn Cân</h1>
+    <div class="stats-container">
+      <div class="stat-item gold">🪙 <span id="goldCount">0</span> Vàng</div>
+      <div class="stat-item gem">💎 <span id="gemCount">0</span> Đá tím</div>
+      <div class="stat-item">🐟 <span id="fishCount">0</span> Cá</div>
+    </div>
+    <div class="main-actions">
+      <button class="btn-go-fishing" onclick="startFishing()">🎣 ĐI CÂU CÁ</button>
+      <button class="action-btn" onclick="showRods()">🪝 CẦN CÂU</button>
+      <button class="action-btn" onclick="sellFish()">🐟 BÁN CÁ</button>
+      <button class="action-btn" onclick="spinWheel()">💎 VÒNG QUAY</button>
+      <button class="action-btn" onclick="showCodes()">🎁 QUÀ CODE</button>
+    </div>
+    <section class="code-section">
+      <label for="codeInput">NHẬP CODE NHẬN QUÀ</label>
+      <div class="input-group">
+        <input type="text" id="codeInput" class="input-code" placeholder="Nhập mã giftcode..." autocomplete="off">
+        <button class="btn-redeem" onclick="redeemCode()">Nhận</button>
+      </div>
+    </section>
+    <div class="skill-list">
+      <div class="skill-title">📜 Chiêu thức đã học:</div>
+      <div id="skillsContainer" class="skill-name">Chưa có chiêu thức nào.</div>
+    </div>
+    <p class="note">Bản thử nghiệm • Tiến trình được lưu trên thiết bị này</p>
+  </main>
+</div>
+
+<section id="fishing">
+  <div class="sky"></div><div class="sun"></div><div class="hills"></div><div class="water"></div><div class="bank"></div><div class="dock"></div>
+  <div class="fish-top">
+    <span>🪙 <span id="fishGold">0</span></span>
+    <span>💎 <span id="fishGem">0</span></span>
+    <span>🐟 <span id="fishCaught">0</span></span>
+  </div>
+  <div id="fishStatus">Đang chuẩn bị câu cá...</div>
+  <div id="angler">🧑🏻‍🎣</div><div id="rod">🎣</div><div id="bigFish">🐟</div>
+  <div id="actions"><button id="pull" onclick="pullFish()">THẢ CẦN</button></div>
+  <button id="back" onclick="leaveFishing()">← VỀ SẢNH</button>
+</section>
+<div id="message"></div>
+
+<script>
+let gold=0, gems=0, fish=0, mode="idle", hp=100, biteTimer=null, rodLevel=1;
+let usedCodes=[];
+let skills=[];
+const $=id=>document.getElementById(id);
+const skillReward="Thục Đạo Sơn Điếu Pháp – Can Môn Đoạn V 1";
+
+function loadGame(){
+  try{
+    const saved=JSON.parse(localStorage.getItem("cauCaVanCanSave")||"{}");
+    gold=Number(saved.gold)||0; gems=Number(saved.gems)||0; fish=Number(saved.fish)||0;
+    usedCodes=Array.isArray(saved.usedCodes)?saved.usedCodes:[];
+    skills=Array.isArray(saved.skills)?saved.skills:[];
+    rodLevel=Number(saved.rodLevel)||1;
+  }catch(e){}
+  update();
+}
+function saveGame(){
+  try{localStorage.setItem("cauCaVanCanSave",JSON.stringify({gold,gems,fish,usedCodes,skills,rodLevel}));}catch(e){}
+}
+function update(){
+  $("goldCount").textContent=gold.toLocaleString("vi-VN");
+  $("gemCount").textContent=gems.toLocaleString("vi-VN");
+  $("fishCount").textContent=fish;
+  $("fishGold").textContent=gold.toLocaleString("vi-VN");
+  $("fishGem").textContent=gems;
+  $("fishCaught").textContent=fish;
+  $("skillsContainer").textContent=skills.length?skills.join(" • "):"Chưa có chiêu thức nào.";
+  saveGame();
+}
+function popup(message,button="ĐÓNG",action="closePopup()"){
+  $("message").innerHTML=message+'<br><button onclick="'+action+'">'+button+'</button>';
+  $("message").style.display="block";
+}
+function closePopup(){$("message").style.display="none";}
+function redeemCode(){
+  const input=$("codeInput");
+  const code=input.value.trim();
+  if(!code){popup("Vui lòng nhập code!");return;}
+  if(usedCodes.includes(code)){popup("Bạn đã sử dụng code này rồi!");return;}
+  if(code==="2032014"){
+    gold+=1000000; gems+=100; usedCodes.push(code); update(); input.value="";
+    popup("🎉 Nhập code thành công!<br>🪙 +1.000.000 vàng<br>💎 +100 đá tím");
+  }else if(code==="1212013"){
+    if(!skills.includes(skillReward))skills.push(skillReward);
+    usedCodes.push(code); update(); input.value="";
+    popup("🎉 Nhận thành công chiêu thức!<br>📜 "+skillReward);
+  }else{
+    popup("❌ Code không hợp lệ!");
+  }
+}
+function showCodes(){
+  popup("🎁 CODE 1: 2032014 – 1.000.000 vàng + 100 đá tím<br>🎁 CODE 2: 1212013 – "+skillReward);
+}
+function showRods(){
+  popup("🪝 CẦN TRE<br>Cấp cần: "+rodLevel+"<br>Sức kéo: "+(rodLevel*10)+"<br><small>Đây là cần câu cơ bản của bản thử nghiệm.</small>");
+}
+function sellFish(){
+  if(fish<=0){popup("Bạn chưa có cá để bán!");return;}
+  const earn=fish*100; gold+=earn; const sold=fish; fish=0; update();
+  popup("Đã bán "+sold+" con cá!<br>🪙 Nhận được "+earn.toLocaleString("vi-VN")+" vàng.");
+}
+function spinWheel(){
+  if(gems<1){popup("Không đủ đá tím để quay!");return;}
+  gems--;
+  const rewards=[100,200,300,500,1000];
+  const prize=rewards[Math.floor(Math.random()*rewards.length)];
+  gold+=prize; update();
+  popup("🎉 Vòng quay trúng "+prize.toLocaleString("vi-VN")+" vàng!");
+}
+function startFishing(){
+  closePopup();
+  $("lobby").style.display="none";
+  $("fishing").style.display="block";
+  mode="waiting"; hp=100;
+  $("fishStatus").innerHTML="Đang chờ cá cắn câu...";
+  $("pull").textContent="THẢ CẦN";
+  $("bigFish").textContent="🐟";
+  clearTimeout(biteTimer);
+  biteTimer=setTimeout(()=>{
+    if(mode==="waiting"){
+      mode="bite";
+      $("fishStatus").innerHTML="🐟 CÁ ĐÃ CẮN CÂU! NHẤN KÉO CÁ!";
+      $("pull").textContent="KÉO CÁ";
+    }
+  },2500+Math.random()*2500);
+}
+function pullFish(){
+  if(mode==="waiting"){
+    $("fishStatus").textContent="Đã thả cần! Chờ cá cắn câu nhé...";
+    return;
+  }
+  if(mode==="bite"){
+    mode="fighting";
+    $("pull").textContent="THU DÂY";
+    $("fishStatus").textContent="Cá đang vùng vẫy! Nhấn THU DÂY liên tục!";
+    return;
+  }
+  if(mode==="fighting"){
+    hp=Math.max(0,hp-18);
+    $("fishStatus").innerHTML="Đang kéo cá... Máu cá: "+hp+"%";
+    $("bigFish").style.transform="translateY("+(Math.random()*24-12)+"px) scaleX(-1)";
+    if(hp<=0){
+      mode="caught"; fish++; update();
+      $("fishStatus").textContent="🎉 BẮT ĐƯỢC CÁ! +1 cá";
+      $("pull").textContent="CÂU TIẾP";
+    }
+    return;
+  }
+  if(mode==="caught")startFishing();
+}
+function leaveFishing(){
+  clearTimeout(biteTimer);
+  $("fishing").style.display="none";
+  $("lobby").style.display="block";
+  mode="idle"; update();
+}
+$("codeInput").addEventListener("keydown",e=>{if(e.key==="Enter")redeemCode();});
+loadGame();
+</script>
+</body>
+</html>
